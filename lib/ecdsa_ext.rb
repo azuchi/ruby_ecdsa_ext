@@ -2,7 +2,7 @@
 
 require_relative "ecdsa_ext/version"
 
-module EcdsaExt
+module ECDSAExt
   class Error < StandardError
   end
   # Your code goes here...

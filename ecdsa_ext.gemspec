@@ -4,7 +4,7 @@ require_relative "lib/ecdsa_ext/version"
 
 Gem::Specification.new do |spec|
   spec.name = "ecdsa_ext"
-  spec.version = EcdsaExt::VERSION
+  spec.version = ECDSAExt::VERSION
   spec.authors = ["azuchi"]
   spec.email = ["techmedia.think@gmail.com"]
 
