@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "lib/ecdsa_ext/version"
+require_relative "lib/ecdsa/ext/version"
 
 Gem::Specification.new do |spec|
   spec.name = "ecdsa_ext"
-  spec.version = ECDSAExt::VERSION
+  spec.version = ECDSA::Ext::VERSION
   spec.authors = ["azuchi"]
   spec.email = ["techmedia.think@gmail.com"]
 
