@@ -1,0 +1,21 @@
+require:
+  - rubocop-rake
+  - rubocop-rspec
+inherit_gem:
+  prettier: rubocop.yml
+AllCops:
+  TargetRubyVersion: 3.0
+RSpec/ExampleLength:
+  Enabled: false
+Metrics:
+  Enabled: false
+RSpec/MultipleExpectations:
+  Max: 5
+Style/IfUnlessModifier:
+  Enabled: false
+Style/WhileUntilModifier:
+  Enabled: false
+Naming/MethodParameterName:
+  Enabled: false
+RSpec/FilePath:
+  Enabled: false
