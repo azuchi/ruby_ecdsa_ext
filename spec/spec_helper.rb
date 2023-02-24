@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "ecdsa_ext"
+require "json"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -12,4 +13,17 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+end
+
+def groups
+  ECDSA::Group::NAMES.map { |name| Module.const_get("ECDSA::Group::#{name}") }
+  # [ECDSA::Group::Secp256k1]
+end
+
+def load_fixture(file_name)
+  File.read(File.join(File.dirname(__FILE__), "fixtures", file_name))
+end
+
+def exist_fixture?(file_name)
+  File.exist?(File.join(File.dirname(__FILE__), "fixtures", file_name))
 end
