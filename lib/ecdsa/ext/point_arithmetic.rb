@@ -8,23 +8,23 @@ module ECDSA
         xx = field.mod(a.x * b.x)
         yy = field.mod(a.y * b.y)
         zz = field.mod(a.z * b.z)
-        xy_pairs = field.mod(((a.x + a.y) * (b.x + b.y)) - (xx + yy))
-        yz_pairs = field.mod(((a.y + a.z) * (b.y + b.z)) - (yy + zz))
-        xz_pairs = field.mod(((a.x + a.z) * (b.x + b.z)) - (xx + zz))
+        xy_pairs = field.mod((a.x + a.y) * (b.x + b.y) - (xx + yy))
+        yz_pairs = field.mod((a.y + a.z) * (b.y + b.z) - (yy + zz))
+        xz_pairs = field.mod((a.x + a.z) * (b.x + b.z) - (xx + zz))
 
-        bzz_part = field.mod(xz_pairs - (a.group.param_b * zz))
+        bzz_part = field.mod(xz_pairs - a.group.param_b * zz)
         bzz3_part = field.mod(bzz_part * 2 + bzz_part)
         yy_m_bzz3 = field.mod(yy - bzz3_part)
         yy_p_bzz3 = field.mod(yy + bzz3_part)
 
-        zz3 = field.mod(zz + zz + zz)
-        bxz_part = field.mod((a.group.param_b * xz_pairs) - (zz3 + xx))
+        zz3 = field.mod(zz * 3)
+        bxz_part = field.mod(a.group.param_b * xz_pairs - (zz3 + xx))
         bxz3_part = field.mod(bxz_part * 3)
         xx3_m_zz3 = field.mod(xx * 3 - zz3)
 
-        x = field.mod((yy_p_bzz3 * xy_pairs) - (yz_pairs * bxz3_part))
-        y = field.mod((yy_p_bzz3 * yy_m_bzz3) + (xx3_m_zz3 * bxz3_part))
-        z = field.mod((yy_m_bzz3 * yz_pairs) + (xy_pairs * xx3_m_zz3))
+        x = field.mod(yy_p_bzz3 * xy_pairs - yz_pairs * bxz3_part)
+        y = field.mod(yy_p_bzz3 * yy_m_bzz3 + xx3_m_zz3 * bxz3_part)
+        z = field.mod(yy_m_bzz3 * yz_pairs + xy_pairs * xx3_m_zz3)
         ProjectivePoint.new(a.group, x, y, z)
       end
 
@@ -82,7 +82,7 @@ module ECDSA
         xy2 = field.mod(point.x * point.y * 2)
         xz2 = field.mod(point.x * point.z * 2)
 
-        bzz_part = field.mod((point.group.param_b * zz) - xz2)
+        bzz_part = field.mod(point.group.param_b * zz - xz2)
         bzz3_part = field.mod(bzz_part + bzz_part + bzz_part)
         yy_m_bzz3 = field.mod(yy - bzz3_part)
         yy_p_bzz3 = field.mod(yy + bzz3_part)
@@ -90,13 +90,13 @@ module ECDSA
         x_frag = field.mod(yy_m_bzz3 * xy2)
 
         zz3 = field.mod(zz * 3)
-        bxz2_part = field.mod((point.group.param_b * xz2) - (zz3 + xx))
+        bxz2_part = field.mod(point.group.param_b * xz2 - (zz3 + xx))
         bxz6_part = field.mod(bxz2_part * 3)
         xx3_m_zz3 = field.mod(xx * 3 - zz3)
 
-        y = field.mod(y_frag + (xx3_m_zz3 * bxz6_part))
+        y = field.mod(y_frag + xx3_m_zz3 * bxz6_part)
         yz2 = field.mod(point.y * point.z * 2)
-        x = field.mod(x_frag - (bxz6_part * yz2))
+        x = field.mod(x_frag - bxz6_part * yz2)
         z = field.mod(yz2 * yy * 4)
         ProjectivePoint.new(point.group, x, y, z)
       end
