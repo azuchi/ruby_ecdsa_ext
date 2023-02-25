@@ -9,8 +9,8 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
       groups.each do |group|
         gen = group.generator.to_projective
         expect(gen.to_affine).to eq(group.generator)
-        private_key = SecureRandom.random_number(group.order - 1)
-        p = group.generator * private_key
+        x = SecureRandom.random_number(group.order - 1)
+        p = group.generator * x
         pp = p.to_projective
         expect(pp.to_affine).to eq(p)
       end
@@ -32,10 +32,10 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
   describe "#multiply_by_scalar" do
     it do
       groups.each do |group|
-        private_key = SecureRandom.random_number(group.order - 1)
-        p = group.generator * private_key
+        x = SecureRandom.random_number(group.order - 1)
+        p = group.generator * x
         pp_gen = group.generator.to_projective
-        pp = pp_gen * private_key
+        pp = pp_gen * x
         expect(pp.to_affine).to eq(p)
       end
     end
@@ -60,12 +60,12 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
           expect(p_a.y).to eq(vectors.last["y"].hex)
         else
           pp_gen = group.generator.to_projective
-          private_key1 = SecureRandom.random_number(group.order - 1)
-          private_key2 = SecureRandom.random_number(group.order - 1)
-          p1 = group.generator * private_key1
-          p2 = group.generator * private_key2
-          pp1 = pp_gen * private_key1
-          pp2 = pp_gen * private_key2
+          x1 = SecureRandom.random_number(group.order - 1)
+          x2 = SecureRandom.random_number(group.order - 1)
+          p1 = group.generator * x1
+          p2 = group.generator * x2
+          pp1 = pp_gen * x1
+          pp2 = pp_gen * x2
           expect((pp1 + pp2).to_affine).to eq(p1 + p2)
         end
       end
@@ -98,12 +98,25 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
   describe "#negate" do
     it do
       groups.each do |group|
-        private_key = SecureRandom.random_number(group.order - 1)
+        x = SecureRandom.random_number(group.order - 1)
         gen = group.generator.to_projective
-        p = gen * private_key
+        p = gen * x
         expect((p + p.negate).infinity?).to be true
         p_a = p.to_affine
         expect(p.negate.to_affine).to eq(p_a.negate)
+      end
+    end
+  end
+
+  describe "#==" do
+    it do
+      groups.each do |group|
+        x = SecureRandom.random_number(group.order - 1)
+        gen = group.generator.to_projective
+        p1 = gen * x
+        p2 = (group.generator * x).to_projective
+        expect(p1).to eq(p2)
+        expect(p1.double).not_to eq(p2)
       end
     end
   end
