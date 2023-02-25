@@ -94,4 +94,17 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
       end
     end
   end
+
+  describe "#negate" do
+    it do
+      groups.each do |group|
+        private_key = SecureRandom.random_number(group.order - 1)
+        gen = described_class.from_affine(group.generator)
+        p = gen * private_key
+        expect((p + p.negate).infinity?).to be true
+        p_a = p.to_affine
+        expect(p.negate.to_affine).to eq(p_a.negate)
+      end
+    end
+  end
 end

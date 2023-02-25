@@ -64,28 +64,24 @@ module ECDSA
         return other if infinity?
         return self if other.infinity?
 
-        # Implements complete addition for any curve
-        if group.param_a == field.mod(-3)
-          addition_negative3(self, other)
-        else
-          addition_any(self, other)
+        if x == other.x && y == field.mod(-other.y) && z == other.z
+          return ProjectivePoint.infinity(group)
         end
 
-        # t0 = field.mod(y * other.z)
-        # t1 = field.mod(other.y * z)
-        # u0 = field.mod(x * other.z)
-        # u1 = field.mod(other.x * z)
-        # return double if u0 == u1 && t0 == t1
-        # t = field.mod(t0 - t1)
-        # u = field.mod(u0 - u1)
-        # u2 = field.mod(u * u)
-        # v = field.mod(z * other.z)
-        # w = field.mod(t * t * v - u2 * (u0 + u1))
-        # u3 = field.mod(u * u2)
-        # new_x = field.mod(u * w)
-        # new_y = field.mod(t * (u0 * u2 - w) - t0 * u3)
-        # new_z = field.mod(u3 * v)
-        # ProjectivePoint.new(group, new_x, new_y, new_z)
+        unless x == other.x
+          return(
+            (
+              if group.param_a == field.mod(-3)
+                addition_negative3(self, other)
+              else
+                addition_any(self, other)
+              end
+            )
+          )
+        end
+
+        return double if self == other
+        raise "Failed to add #{inspect} to #{other.inspect}: No addition rules matched."
       end
       alias + add_to_point
 
@@ -133,6 +129,13 @@ module ECDSA
         q
       end
       alias * multiply_by_scalar
+
+      # Return additive inverse of the point.
+      # @return [ECDSA::Ext::ProjectivePoint]
+      def negate
+        return self if infinity?
+        ProjectivePoint.new(group, x, field.mod(-y), z)
+      end
 
       # Return coordinates.
       # @return [Array] (x, y , z)
