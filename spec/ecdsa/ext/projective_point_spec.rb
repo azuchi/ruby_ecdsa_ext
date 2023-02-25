@@ -7,11 +7,11 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
   describe "#from_affine/to_affine" do
     it do
       groups.each do |group|
-        gen = described_class.from_affine(group.generator)
+        gen = group.generator.to_projective
         expect(gen.to_affine).to eq(group.generator)
         private_key = SecureRandom.random_number(group.order - 1)
         p = group.generator * private_key
-        pp = described_class.from_affine(p)
+        pp = p.to_projective
         expect(pp.to_affine).to eq(p)
       end
     end
@@ -22,7 +22,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
       groups.each do |group|
         i = described_class.infinity(group)
         expect(i.infinity?).to be true
-        gen = described_class.from_affine(group.generator)
+        gen = group.generator.to_projective
         expect(i + gen).to eq(gen)
         expect(gen + i).to eq(gen)
       end
@@ -34,7 +34,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
       groups.each do |group|
         private_key = SecureRandom.random_number(group.order - 1)
         p = group.generator * private_key
-        pp_gen = described_class.from_affine(group.generator)
+        pp_gen = group.generator.to_projective
         pp = pp_gen * private_key
         expect(pp.to_affine).to eq(p)
       end
@@ -46,7 +46,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
       groups.each do |group|
         fixture_file = "#{group.name}.json"
         if exist_fixture?(fixture_file)
-          gen = described_class.from_affine(group.generator)
+          gen = group.generator.to_projective
           p = gen
           vectors = JSON.parse(load_fixture("#{group.name}.json"))
           vectors.each do |v|
@@ -59,7 +59,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
           expect(p_a.x).to eq(vectors.last["x"].hex)
           expect(p_a.y).to eq(vectors.last["y"].hex)
         else
-          pp_gen = described_class.from_affine(group.generator)
+          pp_gen = group.generator.to_projective
           private_key1 = SecureRandom.random_number(group.order - 1)
           private_key2 = SecureRandom.random_number(group.order - 1)
           p1 = group.generator * private_key1
@@ -76,7 +76,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
     it do
       groups.each do |group|
         fixture_file = "#{group.name}.json"
-        gen = described_class.from_affine(group.generator)
+        gen = group.generator.to_projective
         if exist_fixture?(fixture_file)
           p = gen.double
           vectors = JSON.parse(load_fixture("#{group.name}.json"))
@@ -99,7 +99,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
     it do
       groups.each do |group|
         private_key = SecureRandom.random_number(group.order - 1)
-        gen = described_class.from_affine(group.generator)
+        gen = group.generator.to_projective
         p = gen * private_key
         expect((p + p.negate).infinity?).to be true
         p_a = p.to_affine
