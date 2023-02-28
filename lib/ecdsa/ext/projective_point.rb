@@ -103,11 +103,8 @@ module ECDSA
         if infinity?
           group.infinity
         else
-          ECDSA::Point.new(
-            group,
-            field.mod(x * field.inverse(z)),
-            field.mod(y * field.inverse(z))
-          )
+          z_inv = field.inverse(z)
+          ECDSA::Point.new(group, field.mod(x * z_inv), field.mod(y * z_inv))
         end
       end
 
