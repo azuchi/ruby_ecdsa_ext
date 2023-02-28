@@ -1,8 +1,10 @@
-# EcdsaExt
+# Extension of the ecdsa gem
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ecdsa_ext`. To experiment with that code, run `bin/console` for an interactive prompt.
+This library is an extension of the [ecdsa gem](https://github.com/DavidEGrayson/ruby_ecdsa/),
+which mainly speeds up the computation of points on elliptic curves by using projective rather than affine coordinates.
 
-TODO: Delete this and the text above, and describe your gem
+This gem was not written by a cryptography expert and has not been carefully checked as with the original gem.
+It is provided "as is" and it is the user's responsibility to make sure it will be suitable for the desired purpose.
 
 ## Installation
 
@@ -22,22 +24,55 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Convert coordinate from affine to projective
 
-## Development
+```ruby
+require 'ecdsa_ext'
+require 'securerandom'
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+group = ECDSA::Group::Secp256k1
+private_key = 1 + SecureRandom.random_number(group.order - 1)
+affine_point = group.generator * private_key
+#<ECDSA::Point: secp256k1, 0x22a7d03cd6fec52e13d2713da6921cf8f374631ecea7d575d31c3f338a410ad, 0x530b82285b951582bc330fc0b1d26df56bf93277d1229676ab9c2d4749098a7c>
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+# convert to projective point
+projective_point = affine_point.to_projective
+#<ECDSA::Ext::ProjectivePoint:0x00007f45baa7f5b0 @group=#<ECDSA::Group:secp256k1>, @x=979696094695476041658010915065787178569931130816884020506645009594358960301, @y=37562300065191370074864991137132392549749230653372621152572375247509483260540, @z=1>
+```
 
-## Contributing
+### Create directory
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/ecdsa_ext. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/ecdsa_ext/blob/master/CODE_OF_CONDUCT.md).
+```ruby
+require 'ecdsa_ext'
+require 'securerandom'
 
-## License
+group = ECDSA::Group::Secp256k1
+private_key = 1 + SecureRandom.random_number(group.order - 1)
+projective_point = group.generator.to_projective * private_key
+#<ECDSA::Ext::ProjectivePoint:0x00007f45baa7f5b0 @group=#<ECDSA::Group:secp256k1>, @x=979696094695476041658010915065787178569931130816884020506645009594358960301, @y=37562300065191370074864991137132392549749230653372621152572375247509483260540, @z=1>
+```
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+### Operation
 
-## Code of Conduct
+`ECDSA::Ext::ProjectivePoint` instance supports point addition, scalar multiplication and negation.
 
-Everyone interacting in the EcdsaExt project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/ecdsa_ext/blob/master/CODE_OF_CONDUCT.md).
+```ruby
+require 'ecdsa_ext'
+
+# addition
+projective_point3 = projective_point1 + projective_point2
+
+# multiplication
+projective_point4 = projective_point3 * 123
+
+# negation
+projective_point4_neg = projective_point4.negate
+```
+
+### Convert coordinate from projective to affine
+
+```ruby
+require 'ecdsa_ext'
+
+affine_point = projective_point4.to_affine
+```
