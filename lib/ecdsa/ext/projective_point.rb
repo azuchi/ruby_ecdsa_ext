@@ -10,7 +10,7 @@ module ECDSA
 
       # Create new instance of projective
       # @param [ECDSA::Group] group
-      # @param [Array] args [:infinity] or [x, y, z]
+      # @param [Array] args [x, y, z]
       # @return [ECDSA::Ext::ProjectivePoint]
       def initialize(group, *args)
         @group = group
