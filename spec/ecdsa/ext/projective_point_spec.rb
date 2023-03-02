@@ -8,10 +8,9 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
     it do
       groups.each do |group|
         gen = group.generator.to_projective
-        expect(gen.to_affine).to eq(group.generator)
         x = SecureRandom.random_number(group.order - 1)
         p = group.generator * x
-        pp = p.to_projective
+        pp = gen * x
         expect(pp.to_affine).to eq(p)
       end
     end
