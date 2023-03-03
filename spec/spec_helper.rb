@@ -18,7 +18,6 @@ end
 
 def groups
   ECDSA::Group::NAMES.map { |name| Module.const_get("ECDSA::Group::#{name}") }
-  # [ECDSA::Group::Secp256k1]
 end
 
 def load_fixture(file_name)
