@@ -2,7 +2,7 @@
 module ECDSA
   module Ext
     # Point arithmetic implementation
-    module PointArithmetic
+    module ProjectiveArithmetic
       def addition_negative3(a, b)
         field = a.field
         xx = field.mod(a.x * b.x)

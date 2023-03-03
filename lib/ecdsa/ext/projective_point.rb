@@ -4,7 +4,7 @@ module ECDSA
   module Ext
     # Representing a point on elliptic curves using projective coordinates.
     class ProjectivePoint
-      include PointArithmetic
+      include ProjectiveArithmetic
 
       attr_reader :group, :x, :y, :z
 
