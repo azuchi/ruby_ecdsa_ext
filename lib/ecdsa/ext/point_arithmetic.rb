@@ -76,9 +76,9 @@ module ECDSA
 
       def double_negative3(point)
         field = point.field
-        xx = field.power(point.x, 2)
-        yy = field.power(point.y, 2)
-        zz = field.power(point.z, 2)
+        xx = field.square(point.x)
+        yy = field.square(point.y)
+        zz = field.square(point.z)
         xy2 = field.mod(point.x * point.y * 2)
         xz2 = field.mod(point.x * point.z * 2)
 
