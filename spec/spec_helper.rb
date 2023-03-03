@@ -2,6 +2,7 @@
 
 require "ecdsa_ext"
 require "json"
+require "securerandom"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
