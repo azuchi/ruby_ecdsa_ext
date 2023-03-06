@@ -26,7 +26,7 @@ module ECDSA
         group.field
       end
 
-      # Convert coordinates from affine to projective.
+      # Convert coordinates from affine to jacobian.
       # @param [ECDSA::Point] point
       # @return [ECDSA::Ext::JacobianPoint]
       def self.from_affine(point)
@@ -140,10 +140,10 @@ module ECDSA
       end
 
       # Return additive inverse of the point.
-      # @return [ECDSA::Ext::ProjectivePoint]
+      # @return [ECDSA::Ext::JacobianPoint]
       def negate
         return self if infinity?
-        ProjectivePoint.new(group, x, field.mod(-y), z)
+        JacobianPoint.new(group, x, field.mod(-y), z)
       end
 
       # Return coordinates.
