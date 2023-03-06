@@ -71,19 +71,19 @@ module ECDSA
         return other if y.zero? || z.zero?
         return self if other.y.zero? || other.z.zero?
 
-        # unless x == other.x
-        if z == other.z
-          return(
-            z == 1 ? add_with_z_one(self, other) : add_with_z_eq(self, other)
-          )
+        unless x == other.x
+          if z == other.z
+            return(
+              z == 1 ? add_with_z_one(self, other) : add_with_z_eq(self, other)
+            )
+          end
+          return add_with_z2_one(other, self) if z == 1
+          return add_with_z2_one(self, other) if other.z == 1
+          return add_with_z_ne(self, other)
         end
-        return add_with_z2_one(other, self) if z == 1
-        return add_with_z2_one(self, other) if other.z == 1
-        add_with_z_ne(self, other)
-        # end
 
-        # return double if self == other
-        # raise "Failed to add #{inspect} to #{other.inspect}: No addition rules matched."
+        return double if self == other
+        raise "Failed to add #{inspect} to #{other.inspect}: No addition rules matched."
       end
       alias + add_to_point
 

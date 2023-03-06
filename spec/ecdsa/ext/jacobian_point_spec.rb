@@ -37,4 +37,15 @@ RSpec.describe ECDSA::Ext::JacobianPoint do
       end
     end
   end
+
+  describe "add same point" do
+    it do
+      groups.each do |group|
+        x = SecureRandom.random_number(group.order - 1)
+        p1 = group.generator.to_jacobian * x
+        p2 = group.generator.to_jacobian * x
+        expect(p1 + p2).to eq(p1.double)
+      end
+    end
+  end
 end
