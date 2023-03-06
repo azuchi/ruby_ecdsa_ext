@@ -76,3 +76,10 @@ require 'ecdsa_ext'
 
 affine_point = projective_point4.to_affine
 ```
+
+### Use jacobian coordinates
+
+Jacobian coordinates have been supported since 0.3.0.
+
+When using Jacobian coordinates, use `ECDSA::Ext::JacobianPoint` instead of `ECDSA::Ext::ProjectivePoint`.
+In addition, `ECDSA::Point` now has a `to_jacobian` method that convert affine coordinates to jacobian coordinates.

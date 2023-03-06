@@ -6,5 +6,7 @@ module ECDSA
   module Ext
     autoload :ProjectiveArithmetic, "ecdsa/ext/projective_arithmetic"
     autoload :ProjectivePoint, "ecdsa/ext/projective_point"
+    autoload :JacobianArithmetic, "ecdsa/ext/jacobian_arithmetic"
+    autoload :JacobianPoint, "ecdsa/ext/jacobian_point"
   end
 end
