@@ -48,4 +48,17 @@ RSpec.describe ECDSA::Ext::JacobianPoint do
       end
     end
   end
+
+  describe "#negate" do
+    it do
+      groups.each do |group|
+        x = SecureRandom.random_number(group.order - 1)
+        p = group.generator.to_jacobian * x
+        pn = p.negate
+        expect((p + pn).infinity?).to be true
+        pa = p.to_affine
+        expect(pn.to_affine).to eq(pa.negate)
+      end
+    end
+  end
 end
