@@ -3,57 +3,8 @@
 module ECDSA
   module Ext
     # Representing a point on elliptic curves using projective coordinates.
-    class ProjectivePoint
+    class ProjectivePoint < AbstractPoint
       include ProjectiveArithmetic
-
-      attr_reader :group, :x, :y, :z, :infinity
-
-      # Create new instance of projective
-      # @param [ECDSA::Group] group
-      # @param [Array] args [x, y, z]
-      # @return [ECDSA::Ext::ProjectivePoint]
-      def initialize(group, *args)
-        @group = group
-        if args == [:infinity]
-          @infinity = true
-        else
-          @infinity = false
-          @x, @y, @z = args
-          raise ArgumentError, "Invalid x: #{x.inspect}" unless x.is_a?(Integer)
-          raise ArgumentError, "Invalid y: #{y.inspect}" unless y.is_a?(Integer)
-          raise ArgumentError, "Invalid z: #{z.inspect}" unless z.is_a?(Integer)
-        end
-      end
-
-      # Get filed of this group.
-      # @return [ECDSA::PrimeField]
-      def field
-        group.field
-      end
-
-      # Convert coordinates from affine to projective.
-      # @param [ECDSA::Point] point
-      # @return [ECDSA::Ext::ProjectivePoint]
-      def self.from_affine(point)
-        if point.infinity?
-          ProjectivePoint.infinity(point.group)
-        else
-          new(point.group, point.x, point.y, 1)
-        end
-      end
-
-      # Create infinity
-      # @return [ECDSA::Ext::ProjectivePoint]
-      def self.infinity(group)
-        # new(group, :infinity)
-        new(group, :infinity)
-      end
-
-      # Check whether infinity point or not.
-      # @return [Boolean]
-      def infinity?
-        @infinity
-      end
 
       # Add this point to another point on the same curve.
       # @param [ECDSA::Ext::ProjectivePoint] other
@@ -70,7 +21,7 @@ module ECDSA
         return self if other.infinity?
 
         if x == other.x && y == field.mod(-other.y) && z == other.z
-          return ProjectivePoint.infinity(group)
+          return ProjectivePoint.infinity_point(group)
         end
 
         unless x == other.x
@@ -111,38 +62,6 @@ module ECDSA
           z_inv = field.inverse(z)
           ECDSA::Point.new(group, field.mod(x * z_inv), field.mod(y * z_inv))
         end
-      end
-
-      # Return the point multiplied by a non-negative integer.
-      # @param [Integer] x
-      # @return [ECDSA::Ext::ProjectivePoint]
-      def multiply_by_scalar(x)
-        raise ArgumentError, "Scalar is not an integer." unless x.is_a?(Integer)
-        raise ArgumentError, "Scalar is negative." if x.negative?
-
-        q = ProjectivePoint.infinity(group)
-        v = self
-        i = x
-        while i.positive?
-          q = q.add_to_point(v) if i.odd?
-          v = v.double
-          i >>= 1
-        end
-        q
-      end
-      alias * multiply_by_scalar
-
-      # Return additive inverse of the point.
-      # @return [ECDSA::Ext::ProjectivePoint]
-      def negate
-        return self if infinity?
-        ProjectivePoint.new(group, x, field.mod(-y), z)
-      end
-
-      # Return coordinates.
-      # @return [Array] (x, y , z)
-      def coords
-        [x, y, z]
       end
 
       def ==(other)

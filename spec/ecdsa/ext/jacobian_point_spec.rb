@@ -12,6 +12,7 @@ RSpec.describe ECDSA::Ext::JacobianPoint do
         pp = gen * x
         expect(pp.to_affine).to eq(p)
         expect(pp).to eq(p.to_jacobian)
+        expect(described_class.from_affine(group.infinity).infinity?).to be true
       end
     end
   end

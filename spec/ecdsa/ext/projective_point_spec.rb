@@ -11,6 +11,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
         p = group.generator * x
         pp = gen * x
         expect(pp.to_affine).to eq(p)
+        expect(described_class.from_affine(group.infinity).infinity?).to be true
       end
     end
   end
@@ -18,7 +19,7 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
   describe "infinity point" do
     it do
       groups.each do |group|
-        i = described_class.infinity(group)
+        i = described_class.infinity_point(group)
         expect(i.infinity?).to be true
         gen = group.generator.to_projective
         expect(i + gen).to eq(gen)

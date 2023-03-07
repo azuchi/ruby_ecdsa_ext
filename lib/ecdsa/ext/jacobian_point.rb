@@ -3,57 +3,8 @@
 module ECDSA
   module Ext
     # Point of Jacobian coordinates
-    class JacobianPoint
+    class JacobianPoint < AbstractPoint
       include JacobianArithmetic
-
-      attr_reader :group, :x, :y, :z, :infinity
-
-      # Create new instance of jacobian
-      # @param [ECDSA::Group] group
-      # @param [Array] args [x, y, z]
-      # @return [ECDSA::Ext::ProjectivePoint]
-      def initialize(group, *args)
-        @group = group
-        if args == [:infinity]
-          @infinity = true
-        else
-          @infinity = false
-          @x, @y, @z = args
-          raise ArgumentError, "Invalid x: #{x.inspect}" unless x.is_a?(Integer)
-          raise ArgumentError, "Invalid y: #{y.inspect}" unless y.is_a?(Integer)
-          raise ArgumentError, "Invalid z: #{z.inspect}" unless z.is_a?(Integer)
-        end
-      end
-
-      # Get filed of this group.
-      # @return [ECDSA::PrimeField]
-      def field
-        group.field
-      end
-
-      # Convert coordinates from affine to jacobian.
-      # @param [ECDSA::Point] point
-      # @return [ECDSA::Ext::JacobianPoint]
-      def self.from_affine(point)
-        if point.infinity?
-          JacobianPoint.infinity(point.group)
-        else
-          new(point.group, point.x, point.y, 1)
-        end
-      end
-
-      # Create infinity point
-      # @return [ECDSA::Ext::JacobianPoint]
-      def self.infinity(group)
-        # new(group, :infinity)
-        new(group, :infinity)
-      end
-
-      # Check whether infinity point or not.
-      # @return [Boolean]
-      def infinity?
-        @infinity
-      end
 
       # Add this point to another point on the same curve.
       # @param [ECDSA::Ext::JacobianPoint] other
@@ -70,7 +21,7 @@ module ECDSA
         return self if other.infinity?
 
         if x == other.x && y == field.mod(-other.y) && z == other.z
-          return JacobianPoint.infinity(group)
+          return JacobianPoint.infinity_point(group)
         end
 
         return other if y.zero? || z.zero?
@@ -111,25 +62,6 @@ module ECDSA
         JacobianPoint.new(group, t, y3, z3)
       end
 
-      # Return the point multiplied by a non-negative integer.
-      # @param [Integer] x
-      # @return [ECDSA::Ext::JacobianPoint]
-      def multiply_by_scalar(x)
-        raise ArgumentError, "Scalar is not an integer." unless x.is_a?(Integer)
-        raise ArgumentError, "Scalar is negative." if x.negative?
-
-        q = JacobianPoint.infinity(group)
-        v = self
-        i = x
-        while i.positive?
-          q = q.add_to_point(v) if i.odd?
-          v = v.double
-          i >>= 1
-        end
-        q
-      end
-      alias * multiply_by_scalar
-
       # Convert this coordinates to affine coordinates.
       # @return [ECDSA::Point]
       def to_affine
@@ -142,19 +74,6 @@ module ECDSA
           new_y = field.mod(y * tmp_z * z_inv) # y = y * (1/z)^3
           ECDSA::Point.new(group, new_x, new_y)
         end
-      end
-
-      # Return additive inverse of the point.
-      # @return [ECDSA::Ext::JacobianPoint]
-      def negate
-        return self if infinity?
-        JacobianPoint.new(group, x, field.mod(-y), z)
-      end
-
-      # Return coordinates.
-      # @return [Array] (x, y , z)
-      def coords
-        [x, y, z]
       end
 
       # Check whether same jacobian point or not.
