@@ -6,7 +6,7 @@ module ECDSA
     class ProjectivePoint
       include ProjectiveArithmetic
 
-      attr_reader :group, :x, :y, :z
+      attr_reader :group, :x, :y, :z, :infinity
 
       # Create new instance of projective
       # @param [ECDSA::Group] group
@@ -14,10 +14,15 @@ module ECDSA
       # @return [ECDSA::Ext::ProjectivePoint]
       def initialize(group, *args)
         @group = group
-        @x, @y, @z = args
-        raise ArgumentError, "Invalid x: #{x.inspect}" unless x.is_a?(Integer)
-        raise ArgumentError, "Invalid y: #{y.inspect}" unless y.is_a?(Integer)
-        raise ArgumentError, "Invalid z: #{z.inspect}" unless z.is_a?(Integer)
+        if args == [:infinity]
+          @infinity = true
+        else
+          @infinity = false
+          @x, @y, @z = args
+          raise ArgumentError, "Invalid x: #{x.inspect}" unless x.is_a?(Integer)
+          raise ArgumentError, "Invalid y: #{y.inspect}" unless y.is_a?(Integer)
+          raise ArgumentError, "Invalid z: #{z.inspect}" unless z.is_a?(Integer)
+        end
       end
 
       # Get filed of this group.
@@ -41,13 +46,13 @@ module ECDSA
       # @return [ECDSA::Ext::ProjectivePoint]
       def self.infinity(group)
         # new(group, :infinity)
-        new(group, 0, 1, 0)
+        new(group, :infinity)
       end
 
       # Check whether infinity point or not.
       # @return [Boolean]
       def infinity?
-        x.zero? && y == 1 && z.zero?
+        @infinity
       end
 
       # Add this point to another point on the same curve.
