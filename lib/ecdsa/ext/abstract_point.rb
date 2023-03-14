@@ -41,9 +41,8 @@ module ECDSA
       end
 
       # Create infinity point
-      # @return [ECDSA::Ext::JacobianPoint]
+      # @return [ECDSA::Ext::AbstractPoint]
       def self.infinity_point(group)
-        # new(group, :infinity)
         new(group, :infinity)
       end
 
