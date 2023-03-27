@@ -83,3 +83,12 @@ Jacobian coordinates have been supported since 0.3.0.
 
 When using Jacobian coordinates, use `ECDSA::Ext::JacobianPoint` instead of `ECDSA::Ext::ProjectivePoint`.
 In addition, `ECDSA::Point` now has a `to_jacobian` method that convert affine coordinates to jacobian coordinates.
+
+### Apply jacobian coordinates to existing ECDSA sign/verify
+
+If you want the existing ECDSA gem to generate and verify signatures in Jacobian coordinates,
+add the following code. This code is a monkey patch to do the existing process in Jacobian coordinates.
+
+```ruby
+require 'ecdsa/ext/sign_verify'
+```
