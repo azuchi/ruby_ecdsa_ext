@@ -94,6 +94,34 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
     end
   end
 
+  describe "#add_to_point" do
+    it do
+      groups.each do |group|
+        a = SecureRandom.random_number(group.order - 1)
+        b = SecureRandom.random_number(group.order - 1)
+        p1 = (group.generator * a).to_projective
+        p2 = (group.generator * b).to_projective
+        p3 = (group.generator * (a + b)).to_projective
+        expect(p1 + p2).to eq(p3)
+      end
+    end
+
+    context "with negation point" do
+      it do
+        groups.each do |group|
+          x = SecureRandom.random_number(group.order - 1)
+          e = SecureRandom.random_number(group.order - 1)
+          s = (x * e) % group.order
+          xg = group.generator.to_projective * x
+          sg = group.generator.to_projective * s
+          n_xeg = xg * (group.order - e)
+          expect((sg + n_xeg).to_affine.infinity?).to be true
+          expect((sg + n_xeg).infinity?).to be true
+        end
+      end
+    end
+  end
+
   describe "#negate" do
     it do
       groups.each do |group|

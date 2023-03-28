@@ -28,14 +28,25 @@ module ECDSA
         return self if other.y.zero? || other.z.zero?
 
         unless x == other.x
-          if z == other.z
-            return(
+          new_point =
+            if z == other.z
               z == 1 ? add_with_z_one(self, other) : add_with_z_eq(self, other)
+            elsif z == 1
+              add_with_z2_one(other, self)
+            elsif other.z == 1
+              add_with_z2_one(self, other)
+            else
+              add_with_z_ne(self, other)
+            end
+          return(
+            (
+              if new_point.y.zero? || new_point.z.zero?
+                JacobianPoint.infinity_point(group)
+              else
+                new_point
+              end
             )
-          end
-          return add_with_z2_one(other, self) if z == 1
-          return add_with_z2_one(self, other) if other.z == 1
-          return add_with_z_ne(self, other)
+          )
         end
 
         return double if self == other

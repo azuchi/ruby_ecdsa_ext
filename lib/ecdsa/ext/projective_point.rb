@@ -25,12 +25,18 @@ module ECDSA
         end
 
         unless x == other.x
+          new_point =
+            if group.param_a == field.mod(-3)
+              addition_negative3(self, other)
+            else
+              addition_any(self, other)
+            end
           return(
             (
-              if group.param_a == field.mod(-3)
-                addition_negative3(self, other)
+              if new_point.y.zero? || new_point.z.zero?
+                JacobianPoint.infinity_point(group)
               else
-                addition_any(self, other)
+                new_point
               end
             )
           )

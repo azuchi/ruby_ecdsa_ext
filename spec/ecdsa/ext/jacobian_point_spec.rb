@@ -37,6 +37,21 @@ RSpec.describe ECDSA::Ext::JacobianPoint do
         expect(p1 + p2).to eq(p3)
       end
     end
+
+    context "with negation point" do
+      it do
+        groups.each do |group|
+          x = SecureRandom.random_number(group.order - 1)
+          e = SecureRandom.random_number(group.order - 1)
+          s = (x * e) % group.order
+          xg = group.generator.to_jacobian * x
+          sg = group.generator.to_jacobian * s
+          n_xeg = xg * (group.order - e)
+          expect((sg + n_xeg).to_affine.infinity?).to be true
+          expect((sg + n_xeg).infinity?).to be true
+        end
+      end
+    end
   end
 
   describe "add same point" do
