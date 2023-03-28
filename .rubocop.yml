@@ -4,7 +4,7 @@ require:
 inherit_gem:
   prettier: rubocop.yml
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 2.7
 RSpec/ExampleLength:
   Enabled: false
 Metrics:
