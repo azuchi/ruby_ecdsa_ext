@@ -3,9 +3,8 @@
 module ECDSA
   module Ext
     # Point of Jacobian coordinates
+    # http://point-at-infinity.org/ecc/Prime_Curve_Jacobian_Coordinates.html
     class JacobianPoint < AbstractPoint
-      include JacobianArithmetic
-
       # Add this point to another point on the same curve.
       # @param [ECDSA::Ext::JacobianPoint] other
       # @return [ECDSA::Ext::JacobianPoint]
@@ -20,37 +19,21 @@ module ECDSA
         return other if infinity?
         return self if other.infinity?
 
-        if x == other.x && y == field.mod(-other.y) && z == other.z
-          return JacobianPoint.infinity_point(group)
-        end
+        u1 = field.mod(x * field.power(other.z, 2))
+        u2 = field.mod(other.x * field.power(z, 2))
+        s1 = field.mod(y * field.power(other.z, 3))
+        s2 = field.mod(other.y * field.power(z, 3))
 
-        return other if y.zero? || z.zero?
-        return self if other.y.zero? || other.z.zero?
+        return s1 == s2 ? double : infinity_point if u1 == u2
 
-        unless x == other.x
-          new_point =
-            if z == other.z
-              z == 1 ? add_with_z_one(self, other) : add_with_z_eq(self, other)
-            elsif z == 1
-              add_with_z2_one(other, self)
-            elsif other.z == 1
-              add_with_z2_one(self, other)
-            else
-              add_with_z_ne(self, other)
-            end
-          return(
-            (
-              if new_point.y.zero? || new_point.z.zero?
-                JacobianPoint.infinity_point(group)
-              else
-                new_point
-              end
-            )
-          )
-        end
-
-        return double if self == other
-        raise "Failed to add #{inspect} to #{other.inspect}: No addition rules matched."
+        h = field.mod(u2 - u1)
+        h2 = field.power(h, 2)
+        h3 = field.power(h, 3)
+        r = field.mod(s2 - s1)
+        x3 = field.mod(field.power(r, 2) - h3 - 2 * u1 * h2)
+        y3 = field.mod(r * (u1 * h2 - x3) - s1 * h3)
+        z3 = field.mod(h * z * other.z)
+        JacobianPoint.new(group, x3, y3, z3)
       end
       alias + add_to_point
 
@@ -58,19 +41,14 @@ module ECDSA
       # @return [ECDSA::Ext::JacobianPoint]
       def double
         return self if infinity?
+        return infinity_point if y.zero?
 
-        return double_with_z_one(self) if z == 1
-
-        xx = field.square(x)
-        yy = field.square(y)
-        yyyy = field.square(yy)
-        zz = field.square(z)
-        s = field.mod(2 * (field.square(x + yy) - xx - yyyy))
-        m = field.mod(3 * xx + group.param_a * zz * zz)
-        t = field.mod(m * m - 2 * s)
-        y3 = field.mod(m * (s - t) - 8 * yyyy)
-        z3 = field.mod(field.square(y + z) - yy - zz)
-        JacobianPoint.new(group, t, y3, z3)
+        s = field.mod(4 * x * field.power(y, 2))
+        m = field.mod(3 * field.power(x, 2) + group.param_a * field.power(z, 4))
+        x3 = field.mod(field.power(m, 2) - 2 * s)
+        y3 = field.mod(m * (s - x3) - 8 * field.power(y, 4))
+        z3 = field.mod(2 * y * z)
+        JacobianPoint.new(group, x3, y3, z3)
       end
 
       # Convert this coordinates to affine coordinates.
@@ -102,28 +80,6 @@ module ECDSA
         rhs_y = field.mod(other.y * zz * z)
 
         lhs_x == rhs_x && lhs_y == rhs_y
-      end
-
-      private
-
-      def double_non_const
-        return self if infinity?
-        z == 1 ? double_z1 : double
-      end
-
-      def double_z1
-        z3 = field.mod(2 * y)
-        a = field.square(x)
-        b = field.square(y)
-        c = field.square(b)
-        b = field.square(x + b)
-        d = field.mod(2 * (b - (a + c)))
-        e = field.mod(a * 3)
-        f = field.square(e)
-        x3 = field.mod(f - (2 * d))
-        f = field.mod(d - x3)
-        y3 = field.mod(e * f - 8 * c)
-        JacobianPoint.new(group, x3, y3, z3)
       end
     end
   end

@@ -3,9 +3,8 @@
 module ECDSA
   module Ext
     # Representing a point on elliptic curves using projective coordinates.
+    # http://point-at-infinity.org/ecc/Prime_Curve_Standard_Projective_Coordinates.html
     class ProjectivePoint < AbstractPoint
-      include ProjectiveArithmetic
-
       # Add this point to another point on the same curve.
       # @param [ECDSA::Ext::ProjectivePoint] other
       # @return [ECDSA::Ext::ProjectivePoint]
@@ -20,30 +19,21 @@ module ECDSA
         return other if infinity?
         return self if other.infinity?
 
-        if x == other.x && y == field.mod(-other.y) && z == other.z
-          return ProjectivePoint.infinity_point(group)
-        end
-
-        unless x == other.x
-          new_point =
-            if group.param_a == field.mod(-3)
-              addition_negative3(self, other)
-            else
-              addition_any(self, other)
-            end
-          return(
-            (
-              if new_point.y.zero? || new_point.z.zero?
-                JacobianPoint.infinity_point(group)
-              else
-                new_point
-              end
-            )
-          )
-        end
-
-        return double if self == other
-        raise "Failed to add #{inspect} to #{other.inspect}: No addition rules matched."
+        u1 = field.mod(other.y * z)
+        u2 = field.mod(y * other.z)
+        v1 = field.mod(other.x * z)
+        v2 = field.mod(x * other.z)
+        return u1 == u2 ? double : infinity_point if v1 == v2
+        u = field.mod(u1 - u2)
+        v = field.mod(v1 - v2)
+        vv = field.power(v, 2)
+        vvv = field.power(v, 3)
+        w = field.mod(z * other.z)
+        a = field.mod(field.power(u, 2) * w - vvv - 2 * vv * v2)
+        x3 = field.mod(v * a)
+        y3 = field.mod(u * (vv * v2 - a) - vvv * u2)
+        z3 = field.mod(vvv * w)
+        ProjectivePoint.new(group, x3, y3, z3)
       end
       alias + add_to_point
 
@@ -51,12 +41,17 @@ module ECDSA
       # @return [ECDSA::Ext::ProjectivePoint]
       def double
         return self if infinity?
+        return infinity_point if y.zero?
 
-        if group.param_a == field.mod(-3)
-          double_negative3(self)
-        else
-          double_any(self)
-        end
+        w = field.mod(group.param_a * field.power(z, 2) + 3 * field.power(x, 2))
+        s = field.mod(y * z)
+        b = field.mod(x * y * s)
+        h = field.mod(field.power(w, 2) - 8 * b)
+        x3 = field.mod(2 * h * s)
+        y3 =
+          field.mod(w * (4 * b - h) - 8 * field.power(y, 2) * field.power(s, 2))
+        z3 = field.mod(8 * field.power(s, 3))
+        ProjectivePoint.new(group, x3, y3, z3)
       end
 
       # Convert this coordinates to affine coordinates.

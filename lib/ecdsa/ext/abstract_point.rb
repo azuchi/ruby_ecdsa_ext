@@ -46,6 +46,10 @@ module ECDSA
         new(group, :infinity)
       end
 
+      def infinity_point
+        self.class.infinity_point(group)
+      end
+
       # Check whether infinity point or not.
       # @return [Boolean]
       def infinity?
