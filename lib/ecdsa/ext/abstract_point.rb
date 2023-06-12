@@ -78,11 +78,14 @@ module ECDSA
 
         q = self.class.infinity_point(group)
         v = self
-        i = x
-        while i.positive?
-          q = q.add_to_point(v) if i.odd?
+        p, n = to_naf(x)
+        len = [p.bit_length, n.bit_length].max
+        len.times do
+          q += v if p.odd?
+          q += v.negate if n.odd?
           v = v.double
-          i >>= 1
+          p >>= 1
+          n >>= 1
         end
         q
       end
@@ -102,6 +105,20 @@ module ECDSA
 
       def ==(other)
         raise NotImplementedError
+      end
+
+      private
+
+      # Convert Integer to NAF
+      # @param [Integer] x Integer.
+      # @return [Array] (positive, negative)
+      def to_naf(x)
+        xh = x >> 1
+        x3 = x + xh
+        c = xh ^ x3
+        positive = x3 & c
+        negative = xh & c
+        [positive, negative]
       end
     end
   end
