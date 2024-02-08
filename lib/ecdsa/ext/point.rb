@@ -14,5 +14,14 @@ module ECDSA
     def to_jacobian
       ECDSA::Ext::JacobianPoint.from_affine(self)
     end
+
+    # Convert coordinates to hex string.
+    # @return [String]
+    def to_hex(compression = true) # rubocop:disable all
+      ECDSA::Format::PointOctetString.encode(
+        self,
+        compression: compression
+      ).unpack1("H*")
+    end
   end
 end
