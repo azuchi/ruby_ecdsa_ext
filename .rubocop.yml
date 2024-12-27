@@ -19,4 +19,4 @@ Naming/MethodParameterName:
   Enabled: false
 RSpec/SpecFilePathFormat:
   Exclude:
-    - 'spec/ecdsa_ext_point_spec.rb'
+    - 'spec/ecdsa/ext/point_spec.rb'
