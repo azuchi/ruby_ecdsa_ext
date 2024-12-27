@@ -17,5 +17,6 @@ Style/WhileUntilModifier:
   Enabled: false
 Naming/MethodParameterName:
   Enabled: false
-RSpec/FilePath:
-  Enabled: false
+RSpec/SpecFilePathFormat:
+  Exclude:
+    - 'spec/ecdsa_ext_point_spec.rb'
