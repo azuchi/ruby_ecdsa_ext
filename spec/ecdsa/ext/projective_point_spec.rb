@@ -146,5 +146,17 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
         expect(p1.double).not_to eq(p2)
       end
     end
+
+    context "with infinity point" do
+      it do
+        groups.each do |group|
+          p = group.generator.to_projective
+          infinity = described_class.infinity_point(group)
+          expect(infinity == p).to be false
+          expect(p == infinity).to be false
+          expect(infinity == described_class.infinity_point(group)).to be true
+        end
+      end
+    end
   end
 end

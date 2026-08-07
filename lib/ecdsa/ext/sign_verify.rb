@@ -5,7 +5,12 @@ module ECDSA
   def self.sign(group, private_key, digest, temporary_key)
     # Second part of step 1: Select ephemeral elliptic curve key pair
     # temporary_key was already selected for us by the caller
-    r_point = (group.generator.to_jacobian * temporary_key).to_affine
+    # Pad the scalar with the group order so that its bit length is fixed,
+    # mitigating a timing leak of the bit length of temporary_key.
+    # Since (k + i * n)G = kG, this does not change the result.
+    k = temporary_key + group.order
+    k += group.order if k.bit_length == group.order.bit_length
+    r_point = (group.generator.to_jacobian * k).to_affine
 
     # Steps 2 and 3
     point_field = PrimeField.new(group.order)
@@ -29,13 +34,13 @@ module ECDSA
 
   def self.check_signature!(public_key, digest, signature)
     group = public_key.group
-    field = group.field
+    point_field = PrimeField.new(group.order)
 
-    # Step 1: r and s must be in the field and non-zero
-    unless field.include?(signature.r)
+    # Step 1: r and s must be in the range [1, n-1].
+    unless point_field.include?(signature.r)
       raise InvalidSignatureError, "Invalid signature: r is not in the field."
     end
-    unless field.include?(signature.s)
+    unless point_field.include?(signature.s)
       raise InvalidSignatureError, "Invalid signature: s is not in the field."
     end
     if signature.r.zero?
@@ -51,7 +56,6 @@ module ECDSA
     e = normalize_digest(digest, group.bit_length)
 
     # Step 4
-    point_field = PrimeField.new(group.order)
     s_inverted = point_field.inverse(signature.s)
     u1 = point_field.mod(e * s_inverted)
     u2 = point_field.mod(signature.r * s_inverted)

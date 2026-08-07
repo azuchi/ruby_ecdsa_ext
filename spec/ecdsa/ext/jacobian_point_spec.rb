@@ -77,4 +77,16 @@ RSpec.describe ECDSA::Ext::JacobianPoint do
       end
     end
   end
+
+  describe "#== with infinity point" do
+    it do
+      groups.each do |group|
+        p = group.generator.to_jacobian
+        infinity = described_class.infinity_point(group)
+        expect(infinity == p).to be false
+        expect(p == infinity).to be false
+        expect(infinity == described_class.infinity_point(group)).to be true
+      end
+    end
+  end
 end

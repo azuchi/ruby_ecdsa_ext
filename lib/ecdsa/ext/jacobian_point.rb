@@ -71,6 +71,7 @@ module ECDSA
       def ==(other)
         return false unless other.is_a?(JacobianPoint)
         return true if infinity? && other.infinity?
+        return false if infinity? || other.infinity?
 
         zz = field.square(z)
         other_zz = field.square(other.z)
