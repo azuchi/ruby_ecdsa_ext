@@ -25,7 +25,8 @@ RSpec.describe ECDSA::Ext do
       digest = "digest"
       signature = ECDSA.sign(group, private_key, digest, temporary_key)
       field = ECDSA::PrimeField.new(group.order)
-      expected_r = field.mod(group.generator.multiply_by_scalar(temporary_key).x)
+      expected_r =
+        field.mod(group.generator.multiply_by_scalar(temporary_key).x)
       e = ECDSA.normalize_digest(digest, group.bit_length)
       expected_s =
         field.mod(field.inverse(temporary_key) * (e + expected_r * private_key))
@@ -43,13 +44,13 @@ RSpec.describe ECDSA::Ext do
       signature = ECDSA.sign(group, private_key, digest, temporary_key)
       public_key = (group.generator.to_jacobian * private_key).to_affine
       bad_r = ECDSA::Signature.new(group.order, signature.s)
-      expect { ECDSA.check_signature!(public_key, digest, bad_r) }.to raise_error(
-        ECDSA::InvalidSignatureError
-      )
+      expect do
+        ECDSA.check_signature!(public_key, digest, bad_r)
+      end.to raise_error(ECDSA::InvalidSignatureError)
       bad_s = ECDSA::Signature.new(signature.r, group.order)
-      expect { ECDSA.check_signature!(public_key, digest, bad_s) }.to raise_error(
-        ECDSA::InvalidSignatureError
-      )
+      expect do
+        ECDSA.check_signature!(public_key, digest, bad_s)
+      end.to raise_error(ECDSA::InvalidSignatureError)
     end
   end
 end

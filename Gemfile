@@ -17,7 +17,7 @@ gem 'rubocop-rspec'
 gem 'benchmark-ips'
 
 # Bundled gems removed from default gems in Ruby 3.5/4.0.
+gem 'base64'
 gem 'benchmark'
 gem 'ostruct'
 gem 'racc'
-gem 'base64'
