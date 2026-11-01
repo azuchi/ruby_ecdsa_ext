@@ -6,6 +6,11 @@ which mainly speeds up the computation of points on elliptic curves by using pro
 This gem was not written by a cryptography expert and has not been carefully checked as with the original gem.
 It is provided "as is" and it is the user's responsibility to make sure it will be suitable for the desired purpose.
 
+In particular, this gem does **not** provide resistance against timing or other side-channel attacks.
+Scalar multiplication uses a data-dependent NAF add/subtract pattern, the modular inverse is computed with
+a variable-time algorithm, and Ruby's `Integer` arithmetic itself is not constant time.
+Do not use this gem in an environment where an attacker can observe the timing of signing operations.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -92,3 +97,7 @@ add the following code. This code is a monkey patch to do the existing process i
 ```ruby
 require 'ecdsa/ext/sign_verify'
 ```
+
+Note that `ECDSA.sign` provided by this patch is not constant time (see the disclaimer at the top of this README).
+It only pads the ephemeral key so that the number of loop iterations in scalar multiplication is fixed,
+which is a partial mitigation and not a substitute for a constant-time implementation.
