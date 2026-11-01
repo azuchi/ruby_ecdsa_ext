@@ -1,4 +1,57 @@
-module EcdsaExt
-  VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+# Type signatures for ecdsa_ext.
+# The ecdsa gem does not ship signatures, so the classes it defines that are
+# referenced here (Group, Point, PrimeField) are declared minimally.
+module ECDSA
+  class Group
+  end
+
+  class PrimeField
+  end
+
+  class Point
+    def to_projective: () -> Ext::ProjectivePoint
+    def to_jacobian: () -> Ext::JacobianPoint
+    def to_hex: (?bool compression) -> String
+  end
+
+  module Ext
+    VERSION: String
+
+    class AbstractPoint
+      attr_reader group: Group
+      attr_reader x: Integer?
+      attr_reader y: Integer?
+      attr_reader z: Integer?
+      attr_reader infinity: bool
+
+      def initialize: (Group group, *untyped args) -> void
+      def self.from_affine: (Point point) -> instance
+      def self.infinity_point: (Group group) -> instance
+      def field: () -> PrimeField
+      def infinity_point: () -> self
+      def infinity?: () -> bool
+      def negate: () -> self
+      def coords: () -> [Integer?, Integer?, Integer?]
+      def multiply_by_scalar: (Integer x) -> self
+      def *: (Integer x) -> self
+      def add_to_point: (self other) -> self
+      def double: () -> self
+      def to_affine: () -> Point
+      def ==: (untyped other) -> bool
+      def eql?: (untyped other) -> bool
+      def hash: () -> Integer
+
+      private
+
+      def to_naf: (Integer x) -> [Integer, Integer]
+    end
+
+    class ProjectivePoint < AbstractPoint
+      def +: (ProjectivePoint other) -> ProjectivePoint
+    end
+
+    class JacobianPoint < AbstractPoint
+      def +: (JacobianPoint other) -> JacobianPoint
+    end
+  end
 end

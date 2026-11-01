@@ -170,4 +170,16 @@ RSpec.describe ECDSA::Ext::JacobianPoint do
       end
     end
   end
+
+  describe ".new" do
+    it "raises ArgumentError when z is zero" do
+      group = ECDSA::Group::Secp256k1
+      expect { described_class.new(group, 1, 2, 0) }.to raise_error(
+        ArgumentError,
+        /z must not be zero/
+      )
+      expect { described_class.new(group, 1, 2, 1) }.not_to raise_error
+      expect(described_class.infinity_point(group).infinity?).to be true
+    end
+  end
 end

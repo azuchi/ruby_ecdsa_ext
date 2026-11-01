@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../../ecdsa_ext"
+
 # A monkey patch to allow signature generation and verification of existing ECDSA with Jacobian coordinates.
 module ECDSA
   def self.sign(group, private_key, digest, temporary_key)

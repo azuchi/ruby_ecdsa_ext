@@ -20,6 +20,10 @@ module ECDSA
           raise ArgumentError, "Invalid x: #{x.inspect}" unless x.is_a?(Integer)
           raise ArgumentError, "Invalid y: #{y.inspect}" unless y.is_a?(Integer)
           raise ArgumentError, "Invalid z: #{z.inspect}" unless z.is_a?(Integer)
+          if z.zero?
+            raise ArgumentError,
+                  "z must not be zero. Use infinity_point for the point at infinity."
+          end
         end
       end
 

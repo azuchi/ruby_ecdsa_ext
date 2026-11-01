@@ -4,6 +4,9 @@
 - Add `eql?` and `hash` to `AbstractPoint` so that points can be used as Hash keys consistently with `==`
 - Fix the number of iterations in `multiply_by_scalar` to depend only on the bit length of the scalar, and document that signing is still not constant time
 - Raise `ArgumentError` in `ECDSA.sign` when `temporary_key` is not in the range [1, n-1]
+- Raise `ArgumentError` when constructing a point with z = 0 (use `infinity_point` instead)
+- Make `ecdsa/ext/sign_verify` require `ecdsa_ext` itself so it can be required standalone
+- Rewrite `sig/ecdsa_ext.rbs` to describe the actual API
 
 ## [0.5.2] - 2026-08-07
 
