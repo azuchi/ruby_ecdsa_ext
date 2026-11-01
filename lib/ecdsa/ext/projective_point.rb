@@ -67,6 +67,7 @@ module ECDSA
 
       def ==(other)
         return false unless other.is_a?(ProjectivePoint)
+        return false unless other.group == group
         return true if infinity? && other.infinity?
         return false if infinity? || other.infinity?
 

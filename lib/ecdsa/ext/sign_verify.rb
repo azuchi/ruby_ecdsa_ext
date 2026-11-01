@@ -3,11 +3,22 @@
 # A monkey patch to allow signature generation and verification of existing ECDSA with Jacobian coordinates.
 module ECDSA
   def self.sign(group, private_key, digest, temporary_key)
+    unless temporary_key.is_a?(Integer)
+      raise ArgumentError, "temporary_key is not an integer."
+    end
+    unless temporary_key.positive? && temporary_key < group.order
+      raise ArgumentError, "temporary_key must be in the range [1, n-1]."
+    end
+
     # Second part of step 1: Select ephemeral elliptic curve key pair
     # temporary_key was already selected for us by the caller
-    # Pad the scalar with the group order so that its bit length is fixed,
-    # mitigating a timing leak of the bit length of temporary_key.
+    # Pad the scalar with the group order so that its bit length, and thus
+    # the number of iterations in multiply_by_scalar, is fixed.
     # Since (k + i * n)G = kG, this does not change the result.
+    # NOTE: This is only a partial mitigation of timing leaks. The NAF
+    # add/subtract pattern, the modular inverse of temporary_key and Ruby's
+    # Integer arithmetic are still data-dependent, so signing is not
+    # constant time.
     k = temporary_key + group.order
     k += group.order if k.bit_length == group.order.bit_length
     r_point = (group.generator.to_jacobian * k).to_affine

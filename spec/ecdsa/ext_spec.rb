@@ -53,4 +53,29 @@ RSpec.describe ECDSA::Ext do
       end.to raise_error(ECDSA::InvalidSignatureError)
     end
   end
+
+  describe "sign with invalid temporary key" do
+    it "raises ArgumentError when temporary_key is out of range" do
+      group = ECDSA::Group::Secp256k1
+      private_key = 1 + SecureRandom.random_number(group.order - 1)
+      digest = "digest"
+      [0, -1, group.order, group.order + 1, "1", nil].each do |k|
+        expect { ECDSA.sign(group, private_key, digest, k) }.to raise_error(
+          ArgumentError,
+          /temporary_key/
+        )
+      end
+    end
+
+    it "accepts the boundaries 1 and n-1" do
+      group = ECDSA::Group::Secp256k1
+      private_key = 1 + SecureRandom.random_number(group.order - 1)
+      digest = "digest"
+      public_key = (group.generator * private_key)
+      [1, group.order - 1].each do |k|
+        signature = ECDSA.sign(group, private_key, digest, k)
+        expect(ECDSA.valid_signature?(public_key, digest, signature)).to be true
+      end
+    end
+  end
 end

@@ -159,4 +159,85 @@ RSpec.describe ECDSA::Ext::ProjectivePoint do
       end
     end
   end
+
+  describe "#== with different group" do
+    it do
+      k1 = ECDSA::Group::Secp256k1
+      r1 = ECDSA::Group::Secp256r1
+      p1 = described_class.new(k1, 1, 2, 1)
+      p2 = described_class.new(r1, 1, 2, 1)
+      expect(p1 == p2).to be false
+      inf1 = described_class.infinity_point(k1)
+      inf2 = described_class.infinity_point(r1)
+      expect(inf1 == inf2).to be false
+      expect(inf1 == described_class.infinity_point(k1)).to be true
+    end
+  end
+
+  describe "#eql? and #hash" do
+    it "is consistent with #== for different representations" do
+      groups.each do |group|
+        x = 1 + SecureRandom.random_number(group.order - 1)
+        gen = group.generator.to_projective
+        p1 = gen * x
+        p2 = (group.generator * x).to_projective
+        p3 = (gen * (x + 1)) + gen.negate
+        expect(p1.coords).not_to eq(p3.coords)
+        expect(p1).to eql(p2)
+        expect(p1).to eql(p3)
+        expect(p1.hash).to eq(p2.hash)
+        expect(p1.hash).to eq(p3.hash)
+      end
+    end
+
+    it "works as a Hash key" do
+      groups.each do |group|
+        x = 1 + SecureRandom.random_number(group.order - 1)
+        gen = group.generator.to_projective
+        p1 = gen * x
+        p2 = (group.generator * x).to_projective
+        p3 = (gen * (x + 1)) + gen.negate
+        expect([p1, p2, p3].uniq.size).to eq(1)
+        expect({ p1 => :found }[p3]).to eq(:found)
+        expect(p1.hash).not_to eq(p1.double.hash)
+      end
+    end
+
+    it "handles infinity points" do
+      groups.each do |group|
+        inf1 = described_class.infinity_point(group)
+        inf2 = described_class.infinity_point(group)
+        expect(inf1).to eql(inf2)
+        expect(inf1.hash).to eq(inf2.hash)
+        expect(inf1).not_to eql(group.generator.to_projective)
+      end
+    end
+  end
+
+  describe "#multiply_by_scalar with boundary scalars" do
+    it do
+      groups.each do |group|
+        gen = group.generator.to_projective
+        bits = group.order.bit_length
+        scalars = [
+          0,
+          1,
+          2,
+          group.order - 1,
+          group.order,
+          group.order + 1,
+          2 * group.order,
+          (1 << bits) - 1,
+          1 << bits,
+          (1 << (bits + 1)) - 1
+        ]
+        scalars.each do |k|
+          expected = group.generator * k
+          actual = gen * k
+          expect(actual.to_affine).to eq(expected), "scalar #{k}"
+          expect(actual).to eq(expected.to_projective)
+        end
+      end
+    end
+  end
 end

@@ -79,7 +79,10 @@ module ECDSA
         q = self.class.infinity_point(group)
         v = self
         p, n = to_naf(x)
-        len = [p.bit_length, n.bit_length].max
+        # The NAF of x has at most x.bit_length + 1 digits. Using that bound
+        # instead of the actual NAF length keeps the number of iterations
+        # dependent only on the bit length of x.
+        len = x.bit_length + 1
         len.times do
           q += v if p.odd?
           q += v.negate if n.odd?
@@ -105,6 +108,23 @@ module ECDSA
 
       def ==(other)
         raise NotImplementedError
+      end
+
+      # Check whether same point or not.
+      # @param [Object] other
+      # @return [Boolean]
+      def eql?(other)
+        self == other
+      end
+
+      # Return hash value consistent with #==.
+      # Projective representations are not unique, so the hash is computed
+      # from the affine coordinates.
+      # @return [Integer]
+      def hash
+        return [self.class, group, :infinity].hash if infinity?
+        affine = to_affine
+        [self.class, group, affine.x, affine.y].hash
       end
 
       private
