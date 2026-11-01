@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-01
+
 - Fix `==` of `ProjectivePoint`/`JacobianPoint` to return false for points on different groups
 - Add `eql?` and `hash` to `AbstractPoint` so that points can be used as Hash keys consistently with `==`
 - Fix the number of iterations in `multiply_by_scalar` to depend only on the bit length of the scalar, and document that signing is still not constant time
