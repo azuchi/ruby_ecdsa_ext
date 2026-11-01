@@ -2,7 +2,7 @@ require:
   - rubocop-rake
   - rubocop-rspec
 inherit_gem:
-  prettier: rubocop.yml
+  syntax_tree: config/rubocop.yml
 AllCops:
   TargetRubyVersion: 2.7
 RSpec/ExampleLength:

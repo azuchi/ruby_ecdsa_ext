@@ -9,15 +9,15 @@ gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
 
-gem 'prettier', '4.0.3'
+gem "syntax_tree"
 
-gem 'rubocop-rake'
-gem 'rubocop-rspec'
+gem "rubocop-rake"
+gem "rubocop-rspec"
 
-gem 'benchmark-ips'
+gem "benchmark-ips"
 
 # Bundled gems removed from default gems in Ruby 3.5/4.0.
-gem 'base64'
-gem 'benchmark'
-gem 'ostruct'
-gem 'racc'
+gem "base64"
+gem "benchmark"
+gem "ostruct"
+gem "racc"
